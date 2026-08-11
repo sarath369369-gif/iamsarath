@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="A special birthday surprise made with love">
+  <meta name="theme-color" content="#2d1b4e">
+  <title>Your Birthday Surprise ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Ambient layers (shared across screens) -->
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient__gradient"></div>
+    <div class="ambient__orbs"></div>
+    <canvas id="particles-canvas" class="ambient__canvas"></canvas>
+  </div>
+
+  <main id="app" class="app">
+    <!-- 1. Loading Screen -->
+    <section id="screen-loading" class="screen screen--active" data-screen="loading" aria-labelledby="loading-title">
+      <div class="glass-panel glass-panel--center loading">
+        <div class="sparkles sparkles--loading" aria-hidden="true"></div>
+        <p id="loading-title" class="loading__text">Preparing your surprise...</p>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading progress">
+          <div class="progress__bar" id="loading-bar"></div>
+        </div>
+        <p class="loading__hint">Just a moment ✨</p>
+      </div>
+    </section>
+
+    <!-- 2. Welcome Screen -->
+    <section id="screen-welcome" class="screen" data-screen="welcome" aria-labelledby="welcome-title">
+      <div class="screen__content welcome">
+        <div class="floating-hearts" aria-hidden="true"></div>
+        <h1 id="welcome-title" class="welcome__title">
+          Someone has something special for you <span class="heart-pulse">❤️</span>
+        </h1>
+        <p class="welcome__subtitle">Tap below when you're ready</p>
+        <button type="button" class="btn btn--primary btn--glow" id="btn-open-surprise" aria-label="Open surprise">
+          Open Surprise
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. Envelope -->
+    <section id="screen-envelope" class="screen" data-screen="envelope" aria-labelledby="envelope-title">
+      <div class="screen__content envelope-scene">
+        <h2 id="envelope-title" class="visually-hidden">Birthday envelope</h2>
+        <p class="envelope-scene__hint" id="envelope-hint">Tap the envelope to open</p>
+        <button type="button" class="envelope" id="envelope" aria-label="Tap to open envelope">
+          <span class="envelope__back"></span>
+          <span class="envelope__flap"></span>
+          <span class="envelope__front"></span>
+          <span class="envelope__seal">✦</span>
+          <span class="letter letter--inside" id="letter-inside" aria-hidden="true">
+            <span class="letter__line"></span>
+            <span class="letter__line letter__line--short"></span>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. Birthday Letter -->
+    <section id="screen-letter" class="screen" data-screen="letter" aria-labelledby="letter-title">
+      <div class="glass-panel glass-panel--letter">
+        <h2 id="letter-title" class="letter-page__heading">A letter for you</h2>
+        <div class="letter-page__body">
+          <p id="typewriter-text" class="typewriter" aria-live="polite"></p>
+          <span class="typewriter-cursor" aria-hidden="true">|</span>
+        </div>
+        <button type="button" class="btn btn--secondary" id="btn-letter-next" disabled>
+          Continue
+        </button>
+      </div>
+    </section>
+
+    <!-- 5. Countdown -->
+    <section id="screen-countdown" class="screen" data-screen="countdown" aria-live="assertive">
+      <div class="countdown">
+        <span class="countdown__number" id="countdown-number">3</span>
+      </div>
+    </section>
+
+    <!-- 6. Celebration --> 
+    <section id="screen-celebration" class="screen" data-screen="celebration" aria-labelledby="celebration-title">
+      <canvas id="confetti-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+      <canvas id="fireworks-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+      <div class="balloons" id="balloons" aria-hidden="true"></div>
+      <div class="screen__content celebration">
+        <h2 id="celebration-title" class="celebration__title">
+          <span class="celebration__line">Happy</span>
+          <span class="celebration__line celebration__line--gold">Birthday!</span>
+        </h2>
+        <p class="celebration__name" id="celebration-name"><!-- filled by JS --></p>
+        <button type="button" class="btn btn--icon music-toggle" id="btn-music" aria-label="Play birthday music" aria-pressed="false">
+          <span class="music-toggle__play" aria-hidden="true">▶</span>
+          <span class="music-toggle__pause" aria-hidden="true">⏸</span>
+        </button>
+        <button type="button" class="btn btn--primary" id="btn-celebration-next">
+          See the memories
+        </button>
+      </div>
+      <audio id="birthday-audio" preload="metadata" loop>
+        <source src="assets/music/birthday.mp3" type="audio/mpeg">
+      </audio>
+    </section>
+
+    <!-- 7. Memory Gallery -->
+    <section id="screen-gallery" class="screen" data-screen="gallery" aria-labelledby="gallery-title">
+      <div class="screen__content gallery">
+        <h2 id="gallery-title" class="section-title">Memory Gallery</h2>
+        <p class="section-subtitle">Tap a card to reveal the photo</p>
+        <div class="gallery__grid" id="gallery-grid" role="list"></div>
+        <button type="button" class="btn btn--primary" id="btn-gallery-next">
+          Special messages
+        </button>
+      </div>
+      <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+        <button type="button" class="lightbox__close" id="lightbox-close" aria-label="Close">×</button>
+        <img class="lightbox__img" id="lightbox-img" src="" alt="">
+      </div>
+    </section>
+
+    <!-- 8. Special Messages -->
+    <section id="screen-messages" class="screen" data-screen="messages" aria-labelledby="messages-title">
+      <div class="screen__content messages">
+        <h2 id="messages-title" class="section-title">Birthday Wishes</h2>
+        <div class="messages__carousel">
+          <button type="button" class="carousel-btn carousel-btn--prev" id="messages-prev" aria-label="Previous message">‹</button>
+          <div class="messages__track" id="messages-track" role="region" aria-roledescription="carousel"></div>
+          <button type="button" class="carousel-btn carousel-btn--next" id="messages-next" aria-label="Next message">›</button>
+        </div>
+        <div class="messages__dots" id="messages-dots" role="tablist" aria-label="Message slides"></div>
+        <button type="button" class="btn btn--primary" id="btn-messages-next">
+          Make a wish
+        </button>
+      </div>
+    </section>
+
+    <!-- 9. Birthday Cake -->
+    <section id="screen-cake" class="screen" data-screen="cake" aria-labelledby="cake-title">
+      <canvas id="cake-fireworks" class="fx-canvas" aria-hidden="true"></canvas>
+      <div class="screen__content cake-scene">
+        <h2 id="cake-title" class="section-title">Make a wish!</h2>
+        <p class="cake-scene__hint" id="cake-hint">Tap the candle to blow it out</p>
+        <button type="button" class="cake" id="cake" aria-label="Tap candle to blow out">
+          <span class="cake__plate"></span>
+          <span class="cake__layer cake__layer--bottom"></span>
+          <span class="cake__layer cake__layer--middle"></span>
+          <span class="cake__layer cake__layer--top"></span>
+          <span class="cake__icing"></span>
+          <span class="candle" id="candle">
+            <span class="candle__stick"></span>
+            <span class="candle__flame" id="candle-flame"></span>
+          </span>
+        </button>
+        <button type="button" class="btn btn--primary btn--hidden" id="btn-cake-next">
+          Open your gift
+        </button>
+      </div>
+    </section>
+
+    <!-- 10. Gift Box -->
+    <section id="screen-gift" class="screen" data-screen="gift" aria-labelledby="gift-title">
+      <div class="screen__content gift-scene">
+        <h2 id="gift-title" class="visually-hidden">Gift box</h2>
+        <p class="gift-scene__hint" id="gift-hint">Tap the gift to open</p>
+        <button type="button" class="gift-box" id="gift-box" aria-label="Tap to open gift">
+          <span class="gift-box__box"></span>
+          <span class="gift-box__lid"></span>
+          <span class="gift-box__ribbon-v"></span>
+          <span class="gift-box__ribbon-h"></span>
+          <span class="gift-box__bow"></span>
+          <span class="gift-box__spark burst" aria-hidden="true"></span>
+        </button>
+        <div class="gift-message glass-panel" id="gift-message" hidden>
+          <p class="gift-message__text" id="gift-message-text"></p>
+        </div>
+        <button type="button" class="btn btn--primary btn--hidden" id="btn-gift-next">
+          To the finale
+        </button>
+      </div>
+    </section>
+
+    <!-- 11. Ending -->
+    <section id="screen-ending" class="screen" data-screen="ending" aria-labelledby="ending-title">
+      <div class="screen__content ending">
+        <h2 id="ending-title" class="ending__title">Happy Birthday Sumye<span class="heart-pulse">❤️</span></h2>
+        <p class="ending__message">
+          Wishing you endless happiness, success, love, and unforgettable memories My Beloved.
+        </p>
+        <div class="ending__actions">
+          <button type="button" class="btn btn--primary" id="btn-replay">
+           Relive the Memories
+          </button>
+          <button type="button" class="btn btn--secondary" id="btn-share">
+            Share the Love
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/script.js" defer></script>
+</body>
+</html>
